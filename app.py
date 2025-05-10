@@ -14,22 +14,46 @@ app = FastAPI()
 # Class labels
 class_names = ['Flea_Allergy', 'Health', 'Ringworm', 'Scabies']
 
-# Download model if not exists
+# Paths and Google Drive config
 MODEL_PATH = "best_model.pth"
-GDRIVE_FILE_ID = "1WitEsENhyAu4bQCvhhkJWxmgULBhM2_4"  
-GDRIVE_URL = f"https://drive.google.com/uc?export=download&id={GDRIVE_FILE_ID}"
+GDRIVE_FILE_ID = "1WitEsENhyAu4bQCvhhkJWxmgULBhM2_4"
+GDRIVE_URL = f"https://drive.google.com/uc?export=download"
 
+# Utility: download large file from Google Drive (handles virus warning page)
+def download_from_google_drive(file_id, destination):
+    session = requests.Session()
+    response = session.get(GDRIVE_URL, params={'id': file_id}, stream=True)
+    token = get_confirm_token(response)
+
+    if token:
+        params = {'id': file_id, 'confirm': token}
+        response = session.get(GDRIVE_URL, params=params, stream=True)
+
+    save_response_content(response, destination)
+
+def get_confirm_token(response):
+    for key, value in response.cookies.items():
+        if key.startswith("download_warning"):
+            return value
+    return None
+
+def save_response_content(response, destination):
+    CHUNK_SIZE = 32768
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(CHUNK_SIZE):
+            if chunk:
+                f.write(chunk)
+
+# Download model if needed
 if not os.path.exists(MODEL_PATH):
     print("Downloading model...")
-    r = requests.get(GDRIVE_URL)
-    with open(MODEL_PATH, "wb") as f:
-        f.write(r.content)
+    download_from_google_drive(GDRIVE_FILE_ID, MODEL_PATH)
     print("Download complete.")
 
 # Load model
 model = models.resnet50(weights=None)
 model.fc = nn.Linear(model.fc.in_features, len(class_names))
-model.load_state_dict(torch.load(MODEL_PATH, map_location="cpu", weights_only=False))
+model.load_state_dict(torch.load(MODEL_PATH, map_location="cpu"))
 model.eval()
 
 # Image transform
