@@ -17,7 +17,7 @@ class_names = ['Flea_Allergy', 'Health', 'Ringworm', 'Scabies']
 # Paths and Google Drive config
 MODEL_PATH = "best_model.pth"
 GDRIVE_FILE_ID = "1WitEsENhyAu4bQCvhhkJWxmgULBhM2_4"
-GDRIVE_URL = f"https://drive.google.com/uc?export=download"
+GDRIVE_URL = "https://drive.google.com/uc?export=download"
 
 # Utility: download large file from Google Drive (handles virus warning page)
 def download_from_google_drive(file_id, destination):
@@ -53,7 +53,9 @@ if not os.path.exists(MODEL_PATH):
 # Load model
 model = models.resnet50(weights=None)
 model.fc = nn.Linear(model.fc.in_features, len(class_names))
-model.load_state_dict(torch.load(MODEL_PATH, map_location="cpu"))
+
+# FIX: Load with weights_only=False explicitly (trusted source assumption)
+model.load_state_dict(torch.load(MODEL_PATH, map_location="cpu", weights_only=False))
 model.eval()
 
 # Image transform
