@@ -4,4 +4,4 @@ torch
 torchvision
 pillow
 python-multipart
-
+requests
