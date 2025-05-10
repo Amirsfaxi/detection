@@ -16,7 +16,7 @@ class_names = ['Flea_Allergy', 'Health', 'Ringworm', 'Scabies']
 
 # Download model if not exists
 MODEL_PATH = "best_model.pth"
-GDRIVE_FILE_ID = "1WitEsENhyAu4bQCvhhkJWxmgULBhM2_4"  # <-- REPLACE THIS
+GDRIVE_FILE_ID = "1WitEsENhyAu4bQCvhhkJWxmgULBhM2_4"  
 GDRIVE_URL = f"https://drive.google.com/uc?export=download&id={GDRIVE_FILE_ID}"
 
 if not os.path.exists(MODEL_PATH):
